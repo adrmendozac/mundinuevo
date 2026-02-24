@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Munditravels — Acceso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* ── LOGO ── */
+    .logo {
+      position: fixed;
+      top: 22px;
+      right: 28px;
+      z-index: 999;
+    }
+    .logo img {
+      height: 44px;
+      width: auto;
+      display: block;
+      filter: brightness(0) invert(1);
+      opacity: 0.95;
+    }
+
+    /* ── SPLIT ── */
+    .split {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: flex 0.55s cubic-bezier(0.76,0,0.24,1);
+    }
+    .panel:hover { flex: 1.4; }
+
+    /* Screenshot BG */
+    .panel__bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: top center;
+      transition: transform 0.7s ease;
+    }
+    .panel:hover .panel__bg { transform: scale(1.05); }
+    .panel--old .panel__bg { background: linear-gradient(150deg, #160a2e 0%, #2e1a5e 30%, #10427e 65%, #0d5c6e 100%); background-size: cover; }
+    .panel--new .panel__bg { background-image: url('https://images.unsplash.com/photo-1517400508447-f8dd518b86db?q=80&w=1170&auto=format&fit=crop'); background-size: cover; background-position: center; }
+
+    /* Vignette: darkens edges, keeps center more visible than a flat overlay */
+    .panel__vignette {
+      position: absolute;
+      inset: 0;
+      /* radial vignette — dark corners, lighter centre */
+      background: radial-gradient(ellipse at 50% 40%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.62) 100%);
+      transition: opacity 0.4s;
+    }
+    .panel:hover .panel__vignette {
+      opacity: 0.85;
+    }
+
+    /* Extra left-side text readability scrim */
+    .panel__scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.55) 0%, transparent 65%);
+    }
+
+    /* Teal bottom glow — boosted */
+    .panel__glow {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 320px;
+      background: linear-gradient(to top,
+        rgba(0,188,212,0.75) 0%,
+        rgba(0,188,212,0.28) 45%,
+        transparent 100%);
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .panel:hover .panel__glow { opacity: 1.2; }
+
+    /* Noise texture overlay for modern grain feel */
+    .panel__noise {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+    }
+
+    /* ── CONTENT ── */
+    .panel__body {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 58px;
+    }
+
+    .panel__eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 4.5px;
+      text-transform: uppercase;
+      color: #00e5ff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel__eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 2px;
+      background: #00e5ff;
+      border-radius: 2px;
+    }
+
+    .panel__question {
+      font-size: 17px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.88);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .panel__cta {
+      font-size: clamp(44px, 5.2vw, 72px);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 0.95;
+      text-transform: uppercase;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 32px rgba(0,0,0,0.5);
+    }
+    .panel__cta em {
+      font-style: normal;
+      color: #00e5ff;
+    }
+
+    .panel__sub {
+      font-size: 15.5px;
+      font-weight: 600;
+      color:#ffffff;
+      line-height: 1.75;
+      max-width: 300px;
+      margin-bottom: 36px;
+      border-left: 2px solid rgba(0,229,255,0.4);
+      padding-left: 14px;
+    }
+
+    .panel__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 40px;
+      background: #00bcd4;
+      color: #001a1e;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(0,188,212,0.5);
+    }
+    .panel__btn:hover {
+      background: #00e5ff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(0,229,255,0.55);
+    }
+    .panel__btn:active { transform: translateY(0); }
+    .panel__btn svg { transition: transform 0.2s; }
+    .panel__btn:hover svg { transform: translateX(5px); }
+
+    /* ── DIVIDER ── */
+    .divider { display: none; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 700px) {
+      body { overflow-y: auto; height: auto; }
+      .split { flex-direction: column; height: auto; }
+      .panel { flex: none; cursor: default; }
+      .panel--old { min-height: 38vh; }
+      .panel--new { min-height: 62vh; }
+      .panel:hover { flex: none; }
+      .panel__bg { transform: none !important; }
+      .panel__body { padding: 90px 28px 48px; }
+      .panel__cta { font-size: 48px; letter-spacing: -1px; }
+      .panel__sub { max-width: 100%; }
+
+      .logo img { height: 32px; }
+      .logo {
+        top: 14px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <img src="https://travel.munditravels.com/css/clientes/munditravels/brand.png" alt="Mundi Travels"/>
+  </div>
+
+  <div class="split">
+
+    <!-- OLD -->
+    <div class="panel panel--old" onclick="location.href='https://book.munditravels.com/es/'">
+      <div class="panel__bg"></div>
+      <div class="panel__vignette"></div>
+      <div class="panel__scrim"></div>
+      <div class="panel__glow"></div>
+      <div class="panel__noise"></div>
+      <div class="panel__body">
+        <p class="panel__eyebrow">Sistema anterior</p>
+        <p class="panel__question">¿No has migrado aún?</p>
+        <h2 class="panel__cta">Ingresa<br/><em>aquí</em></h2>
+        <p class="panel__sub">Accede con tu usuario habitual mientras completas la migración a la nueva plataforma.</p>
+        <a class="panel__btn" href="https://book.munditravels.com/es/" onclick="event.stopPropagation()">
+          Entrar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="divider">
+      <div class="divider__line"></div>
+      <div class="divider__dot"></div>
+      <div class="divider__badge">O</div>
+      <div class="divider__dot"></div>
+      <div class="divider__line b"></div>
+    </div>
+
+    <!-- NEW -->
+    <div class="panel panel--new" onclick="location.href='https://travel.munditravels.com/login.xhtml?microsite=munditravels&keepurl=true&url=%2F'">
+      <div class="panel__bg"></div>
+      <div class="panel__vignette"></div>
+      <div class="panel__scrim"></div>
+      <div class="panel__glow"></div>
+      <div class="panel__noise"></div>
+      <div class="panel__body">
+        <p class="panel__eyebrow">Nueva plataforma</p>
+        <p class="panel__question">¿Ya migraste?</p>
+        <h2 class="panel__cta">Ingresa<br/><em>aquí</em></h2>
+        <p class="panel__sub">Bienvenido a la nueva experiencia. Accede con tus nuevas credenciales y disfruta todas las mejoras.</p>
+        <a class="panel__btn" href="https://travel.munditravels.com/login.xhtml?microsite=munditravels&keepurl=true&url=%2F" onclick="event.stopPropagation()">
+          Entrar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
